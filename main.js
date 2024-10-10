@@ -15,29 +15,66 @@ const EDUCATION_FILE =
 const COUNTY_FILE =
   'https://cdn.freecodecamp.org/testable-projects-fcc/data/choropleth_map/counties.json';
 
-d3.json(COUNTY_FILE)
-  .then(data => makeMap(data))
-  .catch(err => console.log(err));
+  Promise.all([
+    d3.json(COUNTY_FILE),
+    d3.json(EDUCATION_FILE)
+  ])
+    .then(([countyData, educationData]) => {
+      makeMap(countyData)
+      makeStates(countyData)
+      console.log('County Data:', countyData);
+      console.log('Education Data:', educationData);
+    })
+    .catch(err => console.log('Error:', err));
 
-const makeMap = (bb) => {
-  console.log(bb)
 
-  let width = 960, height = 600;
-  let path = d3.geoPath()
+let width = 960, height = 600;
+let path = d3.geoPath()
 
-  let svg = d3.select("#container").append('svg')
-    .style("width", width).style("height", height);
+let svg = d3.select("#container").append('svg')
+  .style("width", width).style("height", height);
+
+let color = d3
+  .scaleThreshold()
+  .domain(d3.range(2.6, 75.1, (75.1 - 2.6) / 8))
+  .range(d3.schemePurples[9]);
+
+const makeMap = (countyData, educationData) => {
+let counties = topojson.feature(countyData, countyData.objects.counties).features
+
+console.log('ici', counties)
 
   svg.append('g')
     .attr('class', 'counties')
     .selectAll('path')
-    .data(topojson.feature(bb, bb.objects.counties).features)
+    .data(counties)
     .enter()
     .append('path')
     .attr('d', path)
-    .attr('fill', '#088')
-    .attr('stroke', '#000')
+    .attr('fill', color(53))
+    .attr('stroke', '#fff')
+    .attr('stroke-width', '0.2')
     .attr('class', 'county')
+    .attr('data-fips', d => d.id)
+
+  // d3.selectAll('.county')
+  //   .data(educationData)
+  //   .enter()
+}
+
+
+const makeStates = data => {
+  svg.append('g')
+    .attr('class', 'states')
+    .selectAll('path')
+    .data(topojson.feature(data, data.objects.states).features)
+    .enter()
+    .append('path')
+    .attr('d', path)
+    .attr('stroke', '#fff')
+    .attr('stroke-width', '0.5')
+    .attr('fill', 'none')
+    .attr('class', 'state')
 }
   
 
