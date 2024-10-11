@@ -1,3 +1,3 @@
 export default {
-    base: '/D3-heat-map/', // replace with your GitHub repository name
+    base: '/D3-choropleth-map/', // replace with your GitHub repository name
   };
