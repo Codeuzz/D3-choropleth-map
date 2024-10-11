@@ -20,10 +20,8 @@ const COUNTY_FILE =
     d3.json(EDUCATION_FILE)
   ])
     .then(([countyData, educationData]) => {
-      makeMap(countyData)
+      makeMap(countyData, educationData)
       makeStates(countyData)
-      console.log('County Data:', countyData);
-      console.log('Education Data:', educationData);
     })
     .catch(err => console.log('Error:', err));
 
@@ -37,12 +35,18 @@ let svg = d3.select("#container").append('svg')
 let color = d3
   .scaleThreshold()
   .domain(d3.range(2.6, 75.1, (75.1 - 2.6) / 8))
-  .range(d3.schemePurples[9]);
+  .range(d3.schemeBlues[9]);
 
 const makeMap = (countyData, educationData) => {
 let counties = topojson.feature(countyData, countyData.objects.counties).features
 
+
+
 console.log('ici', counties)
+console.log('educationdata ->', educationData)
+
+
+
 
   svg.append('g')
     .attr('class', 'counties')
@@ -51,15 +55,19 @@ console.log('ici', counties)
     .enter()
     .append('path')
     .attr('d', path)
-    .attr('fill', color(53))
+    .attr('fill', d => {
+      let countyX = educationData.find(item => item.fips === d.id)
+      return countyX ? color(countyX.bachelorsOrHigher) : "#0000"
+    })
     .attr('stroke', '#fff')
     .attr('stroke-width', '0.2')
     .attr('class', 'county')
     .attr('data-fips', d => d.id)
+    .attr('data-education', d => {
+      let countyX = educationData.find(item => item.fips === d.id)
+      return countyX.bachelorsOrHigher
+    })
 
-  // d3.selectAll('.county')
-  //   .data(educationData)
-  //   .enter()
 }
 
 
